@@ -6,7 +6,7 @@ This Ethereum smart contract simulates an ATM (Automated Teller Machine) functio
 - **GetBalance**: Users can view balance of their account.
 - **Deposit**: Users can deposit ETH into their account.
 - **Withdraw**: Users can withdraw ETH from their account.
-- **WithdrawALl**: Users can withdraw all token that are in the account.
+- **WithdrawAll**: Users can withdraw all token that are in the account.
 
 ## Getting Started
 
