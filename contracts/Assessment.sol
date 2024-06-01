@@ -1,23 +1,40 @@
-// We require the Hardhat Runtime Environment explicitly here. This is optional
-// but useful for running the script in a standalone fashion through `node <script>`.
-//
-// You can also run a script with `npx hardhat run <script>`. If you do that, Hardhat
-// will compile your contracts, add the Hardhat Runtime Environment's members to the
-// global scope, and execute the script.
-const hre = require("hardhat");
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
 
-async function main() {
-  const initBalance = 1;
-  const Assessment = await hre.ethers.getContractFactory("Assessment");
-  const assessment = await Assessment.deploy(initBalance);
-  await assessment.deployed();
+contract Assessment {
+    // State variables
+    address public owner;
+    uint256 public balance;
 
-  console.log(`A contract with balance of ${initBalance} eth deployed to ${assessment.address}`);
+    // Constructor to set the initial balance and owner
+    constructor(uint256 initBalance) payable {
+        // Ensure the initial balance sent matches the initBalance parameter
+        require(msg.value == initBalance, "Initial balance must match the value sent");
+        owner = msg.sender;
+        balance = initBalance;
+    }
+
+    // Modifier to restrict functions to the contract owner
+    modifier onlyOwner() {
+        require(msg.sender == owner, "Only the owner can perform this action");
+        _;
+    }
+
+    // Function to deposit Ether into the contract
+    function deposit() public payable {
+        balance += msg.value;
+    }
+
+    // Function to withdraw a specified amount of Ether from the contract
+    function withdraw(uint256 amount) public onlyOwner {
+        // Ensure the contract has enough balance for the withdrawal
+        require(amount <= balance, "Insufficient balance");
+        balance -= amount;
+        payable(owner).transfer(amount);
+    }
+
+    // Function to get the current balance of the contract
+    function getBalance() public view returns (uint256) {
+        return balance;
+    }
 }
-
-// We recommend this pattern to be able to use async/await everywhere
-// and properly handle errors.
-main().catch((error) => {
-  console.error(error);
-  process.exitCode = 1;
-});
