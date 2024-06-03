@@ -1,40 +1,56 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
-contract Assessment {
-    // State variables
-    address public owner;
-    uint256 public balance;
+contract ItemQuantityTracker {
+    mapping(string => uint256) private itemQuantities;
 
-    // Constructor to set the initial balance and owner
-    constructor(uint256 initBalance) payable {
-        // Ensure the initial balance sent matches the initBalance parameter
-        require(msg.value == initBalance, "Initial balance must match the value sent");
-        owner = msg.sender;
-        balance = initBalance;
+    function setItemQuantity(string memory itemName, uint256 quantity) public {
+        require(quantity > 0, "Quantity must be greater than zero");
+        itemQuantities[itemName] = quantity;
     }
 
-    // Modifier to restrict functions to the contract owner
-    modifier onlyOwner() {
-        require(msg.sender == owner, "Only the owner can perform this action");
-        _;
+    function getItemQuantity(string memory itemName) public view returns (uint256) {
+        return itemQuantities[itemName];
     }
 
-    // Function to deposit Ether into the contract
-    function deposit() public payable {
-        balance += msg.value;
+    function resetItemQuantity(string memory itemName) public {
+        delete itemQuantities[itemName];
     }
 
-    // Function to withdraw a specified amount of Ether from the contract
-    function withdraw(uint256 amount) public onlyOwner {
-        // Ensure the contract has enough balance for the withdrawal
-        require(amount <= balance, "Insufficient balance");
-        balance -= amount;
-        payable(owner).transfer(amount);
+    function getTotalQuantity() public view returns (uint256) {
+        uint256 totalQuantity;
+        for (uint256 i = 0; i < items.length; i++) {
+            totalQuantity += itemQuantities[items[i]];
+        }
+        return totalQuantity;
     }
 
-    // Function to get the current balance of the contract
-    function getBalance() public view returns (uint256) {
-        return balance;
+    function getAllItems() public view returns (string memory) {
+        string memory allItems;
+        for (uint256 i = 0; i < items.length; i++) {
+            allItems = string(abi.encodePacked(allItems, items[i], ": ", toString(itemQuantities[items[i]]), "\n"));
+        }
+        return allItems;
+    }
+
+    // Helper function to convert uint to string
+    function toString(uint256 value) internal pure returns (string memory) {
+        // Inspired by OraclizeAPI's implementation - MIT license
+        if (value == 0) {
+            return "0";
+        }
+        uint256 temp = value;
+        uint256 digits;
+        while (temp != 0) {
+            digits++;
+            temp /= 10;
+        }
+        bytes memory buffer = new bytes(digits);
+        while (value != 0) {
+            digits -= 1;
+            buffer[digits] = bytes1(uint8(48 + uint256(value % 10)));
+            value /= 10;
+        }
+        return string(buffer);
     }
 }
