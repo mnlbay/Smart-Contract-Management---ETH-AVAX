@@ -1,174 +1,113 @@
-import React, { useState, useEffect } from "react";
-import { ethers } from "ethers";
-import atm_abi from "../artifacts/contracts/Assessment.sol/Assessment.json";
+import React, { useState } from 'react';
 
-export default function HomePage() {
-  const [ethWallet, setEthWallet] = useState(undefined);
-  const [account, setAccount] = useState(undefined);
-  const [atm, setATM] = useState(undefined);
-  const [balance, setBalance] = useState(undefined);
-  const [depositAmount, setDepositAmount] = useState("");
-  const [withdrawAmount, setWithdrawAmount] = useState("");
-  const [owner, setOwner] = useState("");
+const App = () => {
+  const [itemName, setItemName] = useState('');
+  const [quantity, setQuantity] = useState('');
+  const [message, setMessage] = useState('');
+  const [itemQuantities, setItemQuantities] = useState({});
 
-  const contractAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-  const atmABI = atm_abi.abi;
-
-  useEffect(() => {
-    const getWallet = async () => {
-      if (window.ethereum) {
-        setEthWallet(window.ethereum);
-      }
-    };
-    getWallet();
-  }, []);
-
-  useEffect(() => {
-    const handleAccount = (account) => {
-      if (account) {
-        console.log("Account connected: ", account);
-        setAccount(account);
-      } else {
-        console.log("No account found");
-      }
-    };
-
-    const connectAccount = async () => {
-      if (!ethWallet) {
-        alert("MetaMask wallet is required to connect");
-        return;
-      }
-      const accounts = await ethWallet.request({ method: "eth_requestAccounts" });
-      handleAccount(accounts[0]);
-    };
-
-    const getATMContract = () => {
-      if (ethWallet) {
-        const provider = new ethers.providers.Web3Provider(ethWallet);
-        const signer = provider.getSigner();
-        const atmContract = new ethers.Contract(contractAddress, atmABI, signer);
-        setATM(atmContract);
-      }
-    };
-
-    if (ethWallet) {
-      connectAccount();
-      getATMContract();
+  const setItemQuantity = () => {
+    const itemQuantity = parseInt(quantity);
+    if (isNaN(itemQuantity) || itemQuantity <= 0) {
+      setMessage("Error: Quantity must be a positive integer");
+      return;
     }
-  }, [ethWallet]);
-
-  useEffect(() => {
-    const fetchOwner = async () => {
-      if (atm) {
-        const owner = await atm.owner();
-        setOwner(owner);
-      }
-    };
-
-    fetchOwner();
-  }, [atm]);
-
-  const getBalance = async () => {
-    if (atm) {
-      const balance = await atm.getBalance();
-      setBalance(balance.toNumber());
-    }
+    setItemQuantities({ ...itemQuantities, [itemName]: itemQuantity });
+    setMessage(`Quantity of ${itemName} set to ${quantity}`);
   };
 
-  const handleDeposit = async () => {
-    if (atm && depositAmount) {
-      const tx = await atm.deposit(depositAmount);
-      await tx.wait();
-      getBalance();
-      setDepositAmount(""); // Clear input field after deposit
-      window.alert("Deposit successful"); // Alert for successful deposit
+  const getItemQuantity = () => {
+    const itemQuantity = itemQuantities[itemName];
+    if (itemQuantity === undefined) {
+      setMessage(`Error: Quantity is not set for ${itemName}`);
+      return;
     }
+    setMessage(`Quantity of ${itemName} is ${itemQuantity}`);
   };
 
-  const handleWithdraw = async () => {
-    if (atm && withdrawAmount) {
-      const tx = await atm.withdraw(withdrawAmount);
-      await tx.wait();
-      getBalance();
-      setWithdrawAmount(""); // Clear input field after withdrawal
-      window.alert("Withdrawal successful"); // Alert for successful withdrawal
+  const resetItemQuantity = () => {
+    if (itemQuantities[itemName] === undefined) {
+      setMessage(`Error: Quantity is not set for ${itemName}`);
+      return;
     }
+    const updatedQuantities = { ...itemQuantities };
+    delete updatedQuantities[itemName];
+    setItemQuantities(updatedQuantities);
+    setMessage(`Quantity of ${itemName} has been reset`);
   };
 
-  const handleWithdrawAll = async () => {
-    if (atm && balance) {
-      const tx = await atm.withdraw(balance);
-      await tx.wait();
-      getBalance();
-      window.alert("Withdrawal successful"); // Alert for successful withdrawal
-    }
+  const getTotalQuantity = () => {
+    let totalQuantity = 0;
+    Object.values(itemQuantities).forEach(qty => {
+      totalQuantity += qty;
+    });
+    setMessage(`Total quantity of all items: ${totalQuantity}`);
   };
 
-  const checkBalance = () => {
-    window.alert("Your Balance: " + balance);
-  };
-
-  const initUser = () => {
-    if (!ethWallet) {
-      return <p>Please install Metamask in order to use this ATM.</p>;
+  const getAllItems = () => {
+    let allItems = 'Items and Quantities:\n';
+    for (const [item, qty] of Object.entries(itemQuantities)) {
+      allItems += `${item}: ${qty}\n`;
     }
-
-    if (!account) {
-      return (
-        <button onClick={() => window.location.reload()}>
-          Please connect your Metamask wallet
-        </button>
-      );
-    }
-
-    if (balance === undefined) {
-      getBalance();
-    }
-
-    return (
-      <div>
-        <p>Your Account: {account}</p>
-        <p>Owner's Address: {owner}</p>
-        <button onClick={checkBalance}>Check balance</button>
-        <div>
-          <input
-            type="number"
-            value={depositAmount}
-            onChange={(e) => setDepositAmount(e.target.value)}
-            placeholder="Enter deposit amount"
-          />
-          <button onClick={handleDeposit}>Deposit BMB coin</button>
-        </div>
-        <div>
-          <input
-            type="number"
-            value={withdrawAmount}
-            onChange={(e) => setWithdrawAmount(e.target.value)}
-            placeholder="Enter withdraw amount"
-          />
-          <button onClick={handleWithdraw}>Withdraw BMB coin</button>
-        </div>
-        <button onClick={handleWithdrawAll}>Withdraw All BMB coin</button>
-      </div>
-    );
+    setMessage(allItems);
   };
 
   return (
-    <main className="container">
-      <header>
-        <h1>Welcome to BombNet ATM</h1>
-      </header>
-      {initUser()}
-      <style jsx>
-        {`
-          .container {
-            text-align: center;
-          }
-          div {
-            margin-bottom: 10px;
-          }
-        `}
-      </style>
-    </main>
+    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', fontFamily: 'Arial, sans-serif', background: '#f2f2f2' }}>
+      <div style={{ maxWidth: '600px', width: '100%', margin: '0 auto', padding: '20px', border: '1px solid #ccc', borderRadius: '10px', backgroundColor: '#fff', boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)' }}>
+        <h1 style={{ color: '#333', textAlign: 'center', marginBottom: '20px', fontSize: '28px' }}>Item Quantity Tracker</h1>
+        <div style={{ marginBottom: '20px' }}>
+          <input 
+            type="text" 
+            placeholder="Item Name" 
+            value={itemName} 
+            onChange={(e) => setItemName(e.target.value)} 
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontSize: '16px', width: 'calc(100% - 20px)', marginBottom: '10px' }}
+          />
+          <input 
+            type="number" 
+            placeholder="Quantity" 
+            value={quantity} 
+            onChange={(e) => setQuantity(e.target.value)} 
+            style={{ padding: '10px', borderRadius: '5px', border: '1px solid #ccc', fontSize: '16px', width: 'calc(100% - 20px)' }}
+          />
+        </div>
+        <div style={{ marginBottom: '20px', textAlign: 'center' }}>
+          <button 
+            onClick={setItemQuantity} 
+            style={{ padding: '10px 20px', borderRadius: '5px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px', marginRight: '10px' }}
+          >
+            Set Item Quantity
+          </button>
+          <button 
+            onClick={getItemQuantity} 
+            style={{ padding: '10px 20px', borderRadius: '5px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px', marginRight: '10px' }}
+          >
+            Get Item Quantity
+          </button>
+          <button 
+            onClick={resetItemQuantity} 
+            style={{ padding: '10px 20px', borderRadius: '5px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px', marginRight: '10px' }}
+          >
+            Reset Item Quantity
+          </button>
+          <button 
+            onClick={getTotalQuantity} 
+            style={{ padding: '10px 20px', borderRadius: '5px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px', marginRight: '10px' }}
+          >
+            Get Total Quantity
+          </button>
+          <button 
+            onClick={getAllItems} 
+            style={{ padding: '10px 20px', borderRadius: '5px', border: 'none', backgroundColor: '#007bff', color: '#fff', cursor: 'pointer', fontSize: '16px' }}
+          >
+            Get All Items
+          </button>
+          </div>
+        <p style={{ margin: '10px 0', fontWeight: 'bold', color: '#333', textAlign: 'center', fontSize: '16px' }}>{message}</p>
+      </div>
+    </div>
   );
-}
+};
+
+export default App;
