@@ -1,38 +1,47 @@
-# Ethereum ATM Contract
+# Item Quantity Tracker
 
-This Ethereum smart contract simulates an ATM (Automated Teller Machine) functionality, allowing users to deposit, withdraw, and manage their ETH (Ethereum) balance.
+This repository contains a Solidity smart contract for tracking the quantities of items, along with a frontend application for interacting with the deployed contract.
 
-## Features
-- **GetBalance**: Users can view balance of their account.
-- **Deposit**: Users can deposit ETH into their account.
-- **Withdraw**: Users can withdraw ETH from their account.
-- **WithdrawAll**: Users can withdraw all token that are in the account.
+## Smart Contract
 
-## Getting Started
+The `ItemQuantityTracker` contract allows users to set, get, reset, and retrieve the quantities of different items. It's designed to be simple and efficient for managing inventory and stock levels on the Ethereum blockchain.
 
-After cloning the GitHub repository, follow these steps to get the code running on your computer:
+### Features
 
-1. **Install Dependencies**: Inside the project directory, open your terminal and run the following command to install dependencies: npm i
+- **setItemQuantity**: Allows users to set the quantity for a specific item.
+- **getItemQuantity**: Enables users to retrieve the quantity of a specific item.
+- **resetItemQuantity**: Provides functionality to reset the quantity of a specific item.
+- **getTotalQuantity**: Calculates and returns the total quantity of all items combined.
+- **getAllItems**: Returns a formatted string containing all items and their quantities for easy monitoring.
 
+## Frontend Application
 
-2. **Start Local Ethereum Network**: Open two additional terminals in your VS Code. In the second terminal, start a local Ethereum network using Hardhat by running: npx hardhat node
-   
-3. **Deploy the Contract**: In the third terminal, deploy the smart contract to the local network by running: npx hardhat run --network localhost scripts/deploy.js
+The frontend application provides a user-friendly interface for interacting with the deployed smart contract. Users can perform various actions such as setting item quantities, getting item quantities, resetting item quantities, calculating total quantities, and retrieving a list of all items and their quantities.
 
-4. **Launch the Frontend**: Back in the first terminal, start the front-end by running: npm run dev
-   
-After completing these steps, the project will be running on your localhost, typically at [http://localhost:3000/](http://localhost:3000/). You can now interact with the Ethereum ATM contract through the provided interface.
+### Deployment with Frontend Application
+
+To deploy the smart contract along with the frontend application, follow these steps:
+
+1. **Compile and Deploy Smart Contract**:
+   - Compile the `ItemQuantityTracker.sol` file using a Solidity compiler like [Remix](https://remix.ethereum.org/).
+   - Deploy the compiled contract to an Ethereum-compatible network using a tool like [Remix](https://remix.ethereum.org/) or [Truffle](https://www.trufflesuite.com/truffle). Note the deployed contract address.
+
+2. **Set Up Frontend Application**:
+   - Clone the repository containing the frontend application code to your local machine.
+   - Install the required dependencies by navigating to the cloned directory and running `npm install`.
+   - Open the frontend application code and replace the placeholder `'YOUR_CONTRACT_ADDRESS'` with the actual deployed contract address.
+
+3. **Run Frontend Application Locally**:
+   - Start the development server by running `npm start`.
+   - Interact with the frontend application interface to interact with the deployed smart contract.
+
+4. **Deploy Frontend Application**:
+   - If you wish to deploy the frontend application to a hosting service for public access, build the application using `npm run build` and deploy the generated build files to a hosting service like GitHub Pages, Netlify, Vercel, or any other hosting provider of your choice.
 
 ## Author
-
-Alexander Yeoj B. Bombais
-8202636
+-8202636
+-Alexander Yeoj B.Bombais
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE).
-
-
-
-
-
+This project is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
